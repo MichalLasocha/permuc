@@ -94,6 +94,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="hexpand">True</property>
+            <property name="text" translatable="yes">This is a test text message. Say hello to permuc!</property>
             <property name="caps-lock-warning">False</property>
             <property name="placeholder-text" translatable="yes">Plain text message</property>
             <property name="input-hints">GTK_INPUT_HINT_SPELLCHECK | GTK_INPUT_HINT_NONE</property>
@@ -139,6 +140,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="margin-top">8</property>
+                <property name="text" translatable="yes">119845</property>
                 <property name="placeholder-text" translatable="yes">Input key</property>
               </object>
               <packing>
