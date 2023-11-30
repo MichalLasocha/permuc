@@ -20,48 +20,16 @@ GtkEntry *entryKey;
 GtkWidget *spinPasses;
 GtkWidget *spinColumns;
 
+void processKey(const char *rawKey, int columns, char *processedKey) {
+  char tempKey[columns + 1];
+  tempKey[columns] = '\0';
+  int keyVal;
 
-void processKey(const char *rawKey, int numColumns, char *processedKey) {
-    // Allocate memory for the processed key
-    char tempKey[numColumns + 1];
-    tempKey[numColumns] = '\0';
-
-    // Initialize the processed key
-    for (int i = 0; i < numColumns; i++) {
-        tempKey[i] = '0'; // You can use any default value here
-    }
-
-    // Copy the raw key, convert characters to numbers, and remove repeats
-    int processedIndex = 0;
-    for (int i = 0; i < numColumns; i++) {
-        if (isdigit(rawKey[i])) {
-            int keyValue = rawKey[i] - '0';
-
-            // Check if the key value is not already in the processed key
-            int isUnique = 1;
-            for (int j = 0; j < processedIndex; j++) {
-                if (tempKey[j] - '0' == keyValue) {
-                    isUnique = 0;
-                    break;
-                }
-            }
-
-            // If the key value is unique, add it to the processed key
-            if (isUnique) {
-                tempKey[processedIndex++] = keyValue + '0';
-            }
-        }
-    }
-
-    // Repeat the processed key to match the required number of columns
-    while (processedIndex < numColumns) {
-        for (int i = 0; i < processedIndex; i++) {
-            tempKey[processedIndex++] = tempKey[i];
-        }
-    }
-
-    // Copy the processed key to the output parameter
-    strcpy(processedKey, tempKey);
+  for (int i = 0; i < columns; i++) {
+    keyVal = rawKey[i] - 0;
+    tempKey[i] = rawKey[i % strlen(rawKey)];
+  }
+  strcpy(processedKey, tempKey);
 }
 
 // Encrypt
@@ -74,13 +42,11 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   int len_message = strlen(message);
   int len_key = strlen(key);
   printf("[DEBUG] len_message = %d ; len_key = %d \n", len_message, len_key);
-  int columns;
-  (numColumns <= 3) ? (columns = 17) : (columns = numColumns);
+  int columns = (numColumns <= 3) ? (columns = 17) : (columns = numColumns);
   int rows = (int)(len_message / columns) + 1;
 
-   char repeatedKey[columns+1];
-   processKey(key,columns,repeatedKey);
-
+  char repeatedKey[columns + 1];
+  processKey(key, columns, repeatedKey);
 
   printf("[DEBUG] repeatedKey = %s (len = %d from columns = %d)\n", repeatedKey,
          strlen(repeatedKey), columns);
