@@ -32,6 +32,38 @@ void processKey(const char *rawKey, int columns, char *processedKey) {
   strcpy(processedKey, tempKey);
 }
 
+void gridVisualize(int rows, int columns, const char *message) {
+  char grid[rows][columns];
+  int rowIndex, colIndex;
+  int len_message = strlen(message);
+
+  for (rowIndex = 0; rowIndex < rows; rowIndex++) {
+
+    for (colIndex = 0; colIndex < columns; colIndex++) {
+
+      if (rowIndex * columns + colIndex < len_message) {
+
+        grid[rowIndex][colIndex] = message[rowIndex * columns + colIndex];
+      } else {
+        grid[rowIndex][colIndex] = '\t';
+      }
+    }
+  }
+
+
+  for (int i = 0; i < rows; ++i) {
+    printf("|");
+    for (int j = 0; j < columns; ++j) {
+      if (grid[i][j] == '\t') {
+        printf("●|");
+      } else {
+        printf("%c|", grid[i][j]);
+      }
+    }
+    printf("\n");
+  }
+}
+
 // Encrypt
 const gchar *encrypt(const char *message, const char *key, gint numColumns,
                      gint passes) {
@@ -62,34 +94,10 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   // Create a 2D array for the grid
   char grid[rows][columns];
 
+  gridVisualize(rows, columns, message);
+
   // Fill the grid with the message
-  printf("[INFO] Filling grid \n");
-
-  int rowIndex, colIndex;
-
-  for (rowIndex = 0; rowIndex < rows; rowIndex++) {
-
-    for (colIndex = 0; colIndex < columns; colIndex++) {
-
-      if (rowIndex * columns + colIndex < len_message) {
-
-        grid[rowIndex][colIndex] = message[rowIndex * columns + colIndex];
-      } else {
-        grid[rowIndex][colIndex] = '\t';
-      }
-    }
-  }
-
-  for (int i = 0; i < rows; ++i) {
-    for (int j = 0; j < columns; ++j) {
-      if (grid[i][j] == '\t') {
-        printf("● | ");
-      } else {
-        printf("%c | ", grid[i][j]);
-      }
-    }
-    printf("\n");
-  }
+  // printf("[INFO] Filling grid \n");
 
   // Permute the columns based on the key
   for (int i = 0; i < len_key; i++) {
