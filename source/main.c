@@ -20,50 +20,6 @@ GtkEntry *entryKey;
 GtkWidget *spinPasses;
 GtkWidget *spinColumns;
 
-void processKey(const char *rawKey, int columns, char *processedKey) {
-  char tempKey[columns + 1];
-  tempKey[columns] = '\0';
-  int keyVal;
-
-  for (int i = 0; i < columns; i++) {
-    keyVal = rawKey[i] - 0;
-    tempKey[i] = rawKey[i % strlen(rawKey)];
-  }
-  strcpy(processedKey, tempKey);
-}
-
-void gridVisualize(int rows, int columns, const char *message) {
-  char grid[rows][columns];
-  int rowIndex, colIndex;
-  int len_message = strlen(message);
-
-  for (rowIndex = 0; rowIndex < rows; rowIndex++) {
-
-    for (colIndex = 0; colIndex < columns; colIndex++) {
-
-      if (rowIndex * columns + colIndex < len_message) {
-
-        grid[rowIndex][colIndex] = message[rowIndex * columns + colIndex];
-      } else {
-        grid[rowIndex][colIndex] = '\t';
-      }
-    }
-  }
-
-
-  for (int i = 0; i < rows; ++i) {
-    printf("|");
-    for (int j = 0; j < columns; ++j) {
-      if (grid[i][j] == '\t') {
-        printf("●|");
-      } else {
-        printf("%c|", grid[i][j]);
-      }
-    }
-    printf("\n");
-  }
-}
-
 // Encrypt
 const gchar *encrypt(const char *message, const char *key, gint numColumns,
                      gint passes) {
@@ -77,8 +33,7 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   int columns = (numColumns <= 3) ? (columns = 17) : (columns = numColumns);
   int rows = (int)(len_message / columns) + 1;
 
-  char repeatedKey[columns + 1];
-  processKey(key, columns, repeatedKey);
+  int repeatedKey[len_key];
 
   printf("[DEBUG] repeatedKey = %s (len = %d from columns = %d)\n", repeatedKey,
          strlen(repeatedKey), columns);
@@ -94,52 +49,80 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   // Create a 2D array for the grid
   char grid[rows][columns];
 
-  gridVisualize(rows, columns, message);
+  printf("[INFO] Filling grid \n");
 
   // Fill the grid with the message
-  // printf("[INFO] Filling grid \n");
+  int rowIndex, colIndex;
 
-  // Permute the columns based on the key
-  for (int i = 0; i < len_key; i++) {
-    char temp;
-    int j = key[i] - '0'; // Convert character to integer
-    // Swap columns i and j
-    for (int row = 0; row < rows; row++) {
-      temp = grid[row][i];
-      grid[row][i] = grid[row][j];
-      grid[row][j] = temp;
-    }
-  }
-  // Permute the columns based on the repeated key
-  for (int i = 0; i < columns; i++) {
-    char temp;
-    int j = repeatedKey[i];
-    // Swap columns i and j
-    printf("[DEBUG] Swapping columns %d and %d\n", i, j);
-    for (int row = 0; row < rows; row++) {
-      temp = grid[row][i];
-      grid[row][i] = grid[row][j];
-      grid[row][j] = temp;
+  for (rowIndex = 0; rowIndex < rows; rowIndex++) {
+
+    for (colIndex = 0; colIndex < columns; colIndex++) {
+
+      if (rowIndex * columns + colIndex < len_message) {
+
+        grid[rowIndex][colIndex] = message[rowIndex * columns + colIndex];
+      } else {
+        grid[rowIndex][colIndex] = '_';
+      }
     }
   }
 
-  // Create a new string to store the encrypted message
-  char *encrypted_message = (char *)malloc(rows * columns + 1);
+  for (int i = 0; i <= columns; i += len_key) {
+    for (int j = 0; j < len_key; j++) {
+
+      printf("%c | ", key[j]);
+    }
+  }
+
+  printf("\n");
+  for (int i = 0; i < rows; ++i) {
+    for (int j = 0; j < columns; ++j) {
+      if (grid[i][j] == '\t') {
+        printf("● | ");
+      } else {
+        printf("%c | ", grid[i][j]);
+      }
+    }
+    printf("\n");
+  }
+
+  char temp[columns * rows + 1];
+
   int index = 0;
+  for (int i = 0, j = 0; i < columns; i += len_key, j = (j + 1) % len_key) {
+    int keyOff = key[j] - '0';
+    int cCol = i + keyOff - 1;
+      printf("[DEBUG]: keyoff: %d; i = %d; cCol = %d \n",keyOff,i,cCol);
 
-  // Copy the encrypted message from the grid to the new string
-  for (int i = 0; i < rows; i++) {
-    for (int j = 0; j < columns; j++) {
-      encrypted_message[index++] = grid[i][j];
+    for (int x = 0; x < rows; x++) {
+      temp[index] == grid[cCol][x];
+      printf("[DEBUG]: current char: %d – %c \n",x,grid[cCol][x]);
+      index++;
+      printf("[DEBUG]: Index: %d \n",index);
     }
   }
 
-  // Null-terminate the new string
-  encrypted_message[index] = '\0';
-
-  // Return the encrypted message
-  return encrypted_message;
+  temp[index] = '\0';
+  printf("[INFO] temp: %s \n", temp);
+  return temp;
 }
+
+// Create a new string to store the encrypted message
+//    char *encrypted_message = (char *)malloc(rows * columns + 1);
+//    int index = 0;
+//
+//    // Copy the encrypted message from the grid to the new string
+//    for (int i = 0; i < rows; i++) {
+//      for (int j = 0; j < columns; j++) {
+//        encrypted_message[index++] = grid[i][j];
+//      }
+//    }
+
+// Null-terminate the new string
+//    encrypted_message[index] = '\0';
+
+// Return the encrypted message
+// return encrypted_message;
 
 // Key function
 
