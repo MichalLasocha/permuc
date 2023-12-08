@@ -20,6 +20,73 @@ GtkEntry *entryKey;
 GtkWidget *spinPasses;
 GtkWidget *spinColumns;
 
+void createKeyIndexTable(const char *numericalString, int *indexTable) {
+  // Get the length of the string
+  int length = 0;
+  while (numericalString[length] != '\0') {
+    length++;
+  }
+
+  // Create an array to store the original indices
+  int *originalIndices = (int *)malloc(length * sizeof(int));
+  for (int i = 0; i < length; i++) {
+    originalIndices[i] = i;
+  }
+
+  // Bubble sort to order the numbers and update the original indices
+  for (int i = 0; i < length - 1; i++) {
+    for (int j = 0; j < length - i - 1; j++) {
+      if (numericalString[j] > numericalString[j + 1]) {
+        // Swap numbers
+        char tempChar = numericalString[j];
+        numericalString[j] = numericalString[j + 1];
+        numericalString[j + 1] = tempChar;
+
+        // Swap indices
+        int tempIndex = originalIndices[j];
+        originalIndices[j] = originalIndices[j + 1];
+        originalIndices[j + 1] = tempIndex;
+      }
+    }
+  }
+  printf("[DEBUG]Key table: ");
+
+  for (int i = 0; i <= length; i++) {
+      printf("%d, ",originalIndices[i]);
+    }
+      printf("\n");
+  
+
+  // Update the indexTable with the ordered indices
+  for (int i = 0; i < length; i++) {
+    indexTable[i] = originalIndices[i];
+  }
+
+  // Free the dynamically allocated arrays
+}
+
+char *displayArr(int *arr[]) {
+  // make dupe of an array
+  int length = sizeof(arr) / sizeof(arr[0]);
+  int arrLength = 2 * length;
+
+  char *result = (char *)malloc(arrLength * sizeof(char));
+  if (result == NULL) {
+    fprintf(stderr, "Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int offset = 0;
+  for (int i = 0; i < length; i++) {
+    offset += snprintf(result + offset, arrLength - offset, "%d", arr[i]);
+    if (i < length - 1) {
+      offset += snprintf(result + offset, arrLength - offset, ", ");
+    }
+  }
+
+  return result;
+}
+
 // Encrypt
 const gchar *encrypt(const char *message, const char *key, gint numColumns,
                      gint passes) {
@@ -33,10 +100,11 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   int columns = (numColumns <= 3) ? (columns = 17) : (columns = numColumns);
   int rows = (int)(len_message / columns) + 1;
 
-  int repeatedKey[len_key];
+  int keyTable[len_key];
+  createKeyIndexTable(key, keyTable);
 
-  printf("[DEBUG] repeatedKey = %s (len = %d from columns = %d)\n", repeatedKey,
-         strlen(repeatedKey), columns);
+  printf("[DEBUG] keyTable = %d  (len = %d from columns = %d)\n", keyTable[2],
+         sizeof(keyTable), columns);
   printf("[DEBUG] Creating grid with %d columns and %d rows\n", columns, rows);
 
   if (rows < 4) {
@@ -89,20 +157,21 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   char temp[columns * rows + 1];
 
   int index = 0;
-  for (int i = 0, j = 0; i < columns; i += len_key, j = (j + 1) % len_key) {
-    int keyOff = key[j] - '0';
-    int cCol = i + keyOff - 1;
-      printf("[DEBUG]: keyoff: %d; i = %d; cCol = %d \n",keyOff,i,cCol);
-
-    for (int x = 0; x < rows; x++) {
-      temp[index] == grid[cCol][x];
-      printf("[DEBUG]: current char: %d – %c \n",x,grid[cCol][x]);
-      index++;
-      printf("[DEBUG]: Index: %d \n",index);
+  for (int i = 0; i < columns; i += len_key) {
+    int col = i;
+    for (int j = 0; j < len_key; j++) {
+      int keyOff = keyTable[j];
+      int cCol = col + keyOff;
+      printf("[DEBUG]: keyoff: %d; i = %d; cCol = %d \n", keyOff, i, cCol);
+      for (int x = 0; x < rows; x++) {
+        temp[index] == grid[x][cCol];
+        printf("[DEBUG]: current char: %d – %c \n", x, grid[x][cCol]);
+        index++;
+        printf("[DEBUG]: Index: %d \n", index);
+      }
     }
   }
-
-  temp[index] = '\0';
+  temp[columns*rows+1] = '\0';
   printf("[INFO] temp: %s \n", temp);
   return temp;
 }
