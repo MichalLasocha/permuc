@@ -20,8 +20,16 @@ GtkEntry *entryKey;
 GtkWidget *spinPasses;
 GtkWidget *spinColumns;
 
-void createKeyIndexTable(const char *numericalString, int *indexTable) {
+void createKeyIndexTable(const char *_numericalString, int *indexTable) {
   // Get the length of the string
+  char *numericalString =
+      (char *)malloc(strlen(_numericalString) * sizeof(char));
+  if (numericalString == NULL) {
+    fprintf(stderr, "Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(numericalString, _numericalString);
+
   int length = 0;
   while (numericalString[length] != '\0') {
     length++;
@@ -52,17 +60,17 @@ void createKeyIndexTable(const char *numericalString, int *indexTable) {
   printf("[DEBUG]Key table: ");
 
   for (int i = 0; i <= length; i++) {
-      printf("%d, ",originalIndices[i]);
-    }
-      printf("\n");
-  
+    printf("%d, ", originalIndices[i]);
+  }
+  printf("\n");
 
   // Update the indexTable with the ordered indices
   for (int i = 0; i < length; i++) {
-    indexTable[i] = originalIndices[i];
+    indexTable[i] = /* o */ riginalIndices[i];
   }
 
   // Free the dynamically allocated arrays
+  free(numericalString);
 }
 
 char *displayArr(int *arr[]) {
@@ -171,7 +179,7 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
       }
     }
   }
-  temp[columns*rows+1] = '\0';
+  temp[columns * rows + 1] = '\0';
   printf("[INFO] temp: %s \n", temp);
   return temp;
 }
