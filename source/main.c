@@ -22,8 +22,7 @@ GtkWidget *spinColumns;
 
 void createKeyIndexTable(const char *_numericalString, int *indexTable) {
   // Get the length of the string
-  char *numericalString =
-      (char *)malloc(strlen(_numericalString) * sizeof(char));
+  char *numericalString = (char *)malloc(strlen(_numericalString) * sizeof(char));
   if (numericalString == NULL) {
     fprintf(stderr, "Memory allocation error\n");
     exit(EXIT_FAILURE);
@@ -66,7 +65,7 @@ void createKeyIndexTable(const char *_numericalString, int *indexTable) {
 
   // Update the indexTable with the ordered indices
   for (int i = 0; i < length; i++) {
-    indexTable[i] = /* o */ riginalIndices[i];
+    indexTable[i] = originalIndices[i];
   }
 
   // Free the dynamically allocated arrays
@@ -172,34 +171,18 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
       int cCol = col + keyOff;
       printf("[DEBUG]: keyoff: %d; i = %d; cCol = %d \n", keyOff, i, cCol);
       for (int x = 0; x < rows; x++) {
-        temp[index] == grid[x][cCol];
+        //temp[index] == grid[x][cCol];
+        strncat(temp,&grid[x][cCol],1);
         printf("[DEBUG]: current char: %d – %c \n", x, grid[x][cCol]);
         index++;
-        printf("[DEBUG]: Index: %d \n", index);
+        //printf("[DEBUG]: Index: %d \n", index);
       }
     }
   }
-  temp[columns * rows + 1] = '\0';
+//  temp[columns * rows + 1] = '\0';
   printf("[INFO] temp: %s \n", temp);
   return temp;
 }
-
-// Create a new string to store the encrypted message
-//    char *encrypted_message = (char *)malloc(rows * columns + 1);
-//    int index = 0;
-//
-//    // Copy the encrypted message from the grid to the new string
-//    for (int i = 0; i < rows; i++) {
-//      for (int j = 0; j < columns; j++) {
-//        encrypted_message[index++] = grid[i][j];
-//      }
-//    }
-
-// Null-terminate the new string
-//    encrypted_message[index] = '\0';
-
-// Return the encrypted message
-// return encrypted_message;
 
 // Key function
 
