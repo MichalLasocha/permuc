@@ -22,7 +22,8 @@ GtkWidget *spinColumns;
 
 void createKeyIndexTable(const char *_numericalString, int *indexTable) {
   // Get the length of the string
-  char *numericalString = (char *)malloc(strlen(_numericalString) * sizeof(char));
+  char *numericalString =
+      (char *)malloc(strlen(_numericalString) * sizeof(char));
   if (numericalString == NULL) {
     fprintf(stderr, "Memory allocation error\n");
     exit(EXIT_FAILURE);
@@ -96,7 +97,7 @@ char *displayArr(int *arr[]) {
 
 // Encrypt
 const gchar *encrypt(const char *message, const char *key, gint numColumns,
-                     gint passes) {
+                     gint _passes) {
   if (message == NULL || key == NULL) {
     printf("[ERROR] Encrypt or key is null!\n");
     return NULL;
@@ -105,6 +106,7 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   int len_key = strlen(key);
   printf("[DEBUG] len_message = %d ; len_key = %d \n", len_message, len_key);
   int columns = (numColumns <= 3) ? (columns = 17) : (columns = numColumns);
+  int passes = (_passes <= 0) ? (passes = 1) : (passes = _passes);
   int rows = (int)(len_message / columns) + 1;
 
   int keyTable[len_key];
@@ -163,7 +165,7 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
 
   char temp[columns * rows + 1];
 
-  int index = 0;
+  printf("[DEBUG] attempting enc with %d passes\n",passes);
   for (int i = 0; i < columns; i += len_key) {
     int col = i;
     for (int j = 0; j < len_key; j++) {
@@ -171,15 +173,11 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
       int cCol = col + keyOff;
       printf("[DEBUG]: keyoff: %d; i = %d; cCol = %d \n", keyOff, i, cCol);
       for (int x = 0; x < rows; x++) {
-        //temp[index] == grid[x][cCol];
-        strncat(temp,&grid[x][cCol],1);
+        strncat(temp, &grid[x][cCol], 1);
         printf("[DEBUG]: current char: %d – %c \n", x, grid[x][cCol]);
-        index++;
-        //printf("[DEBUG]: Index: %d \n", index);
       }
     }
   }
-//  temp[columns * rows + 1] = '\0';
   printf("[INFO] temp: %s \n", temp);
   return temp;
 }
