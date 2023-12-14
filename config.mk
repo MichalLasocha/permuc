@@ -2,14 +2,14 @@ SHELL ?= /bin/sh
 
 #app info
 VERSION    ?= 0.0.1
-TARGET     ?= template_app
-NAME       ?= Template App
+TARGET     ?= permuc
+NAME       ?= PermuC
 #APP_ID can start with a website or email in reverse url format
 APP_ID     ?= com.email.name.$(TARGET)
 #APP_PREFIX is APP_ID converted to a path.
 APP_PREFIX ?= $(shell echo $(APP_ID) | sed 's:\.:/:g;s:^:/:g')
-COPYRIGHT  ?= Copyright (C) 2021
-AUTHOR     ?= [Your name here]
+COPYRIGHT  ?= Copyright (C) 2023
+AUTHOR     ?= Michał Łasocha
 COMMENT    ?= GTK+ 3.0 template Application
 CATEGORIES ?= Utility;ComputerScience;GNOME;GTK;
 

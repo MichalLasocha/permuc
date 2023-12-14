@@ -73,27 +73,27 @@ void createKeyIndexTable(const char *_numericalString, int *indexTable) {
   free(numericalString);
 }
 
-char *displayArr(int *arr[]) {
-  // make dupe of an array
-  int length = sizeof(arr) / sizeof(arr[0]);
-  int arrLength = 2 * length;
-
-  char *result = (char *)malloc(arrLength * sizeof(char));
-  if (result == NULL) {
-    fprintf(stderr, "Memory allocation error\n");
-    exit(EXIT_FAILURE);
-  }
-
-  int offset = 0;
-  for (int i = 0; i < length; i++) {
-    offset += snprintf(result + offset, arrLength - offset, "%d", arr[i]);
-    if (i < length - 1) {
-      offset += snprintf(result + offset, arrLength - offset, ", ");
-    }
-  }
-
-  return result;
-}
+//char *displayArr(int *arr[]) {
+//  // make dupe of an array
+//  int length = sizeof(arr) / sizeof(arr[0]);
+//  int arrLength = 2 * length;
+//
+//  char *result = (char *)malloc(arrLength * sizeof(char));
+//  if (result == NULL) {
+//    fprintf(stderr, "Memory allocation error\n");
+//    exit(EXIT_FAILURE);
+//  }
+//
+//  int offset = 0;
+//  for (int i = 0; i < length; i++) {
+//    offset += snprintf(result + offset, arrLength - offset, "%d", arr[i]);
+//    if (i < length - 1) {
+//      offset += snprintf(result + offset, arrLength - offset, ", ");
+//    }
+//  }
+//
+//  return result;
+//}
 
 // Encrypt
 const gchar *encrypt(const char *message, const char *key, gint numColumns,
@@ -113,8 +113,6 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   int keyTable[len_key];
   createKeyIndexTable(key, keyTable);
 
-  printf("[DEBUG] keyTable = %d  (len = %d from columns = %d)\n", keyTable[2],
-         sizeof(keyTable), columns);
   printf("[DEBUG] Creating grid with %d columns and %d rows\n", columns, rows);
 
   if (rows < 4) {
@@ -123,68 +121,73 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
     rows = 4;
   }
   printf("[INFO] Creating grid with %d columns and %d rows\n", columns, rows);
-
-  // Create a 2D array for the grid
   char grid[rows][columns];
+  // Create a 2D array for the grid
 
-  printf("[DEBUG] pass \n");
-  printf("[DEBUG] Filling grid \n");
 
-  // Fill the grid with the message
-  int rowIndex, colIndex;
-
-  for (rowIndex = 0; rowIndex < rows; rowIndex++) {
-
-    for (colIndex = 0; colIndex < columns; colIndex++) {
-
-      if (rowIndex * columns + colIndex < len_message) {
-
-        grid[rowIndex][colIndex] = message[rowIndex * columns + colIndex];
-      } else {
-        grid[rowIndex][colIndex] = ' ';
-      }
-    }
-  }
-
-  for (int i = 0; i <= columns; i += len_key) {
-    for (int j = 0; j < len_key; j++) {
-
-      printf("%c | ", key[j]);
-    }
-  }
-
-  printf("\n");
-  for (int i = 0; i < rows; ++i) {
-    for (int j = 0; j < columns; ++j) {
-      if (grid[i][j] == '\t') {
-        printf("● | ");
-      } else {
-        printf("%c | ", grid[i][j]);
-      }
-    }
-    printf("\n");
-  }
-
-  int opt_len = columns * rows + 1;
+  int opt_len = (columns * rows) + 1;
   char temp[opt_len];
-  temp[0] = '\0';
+  strcpy(temp, message);
+  for (int i = len_message; i < len_message + (rows - 1) * columns; i++) {
+    temp[i] = (i < len_message) ? temp[i] : '*';
+  }
 
-  printf("[DEBUG] attempting enc with %d passes\n", passes);
-  for (int i = 0; i < columns; i += len_key) {
-    int col = i;
-    for (int j = 0; j < len_key; j++) {
-      int keyOff = keyTable[j];
-      int cCol = col + keyOff;
-      printf("[DEBUG]: keyoff: %d; i = %d; cCol = %d \n", keyOff, i, cCol);
-      for (int x = 0; x < rows; x++) {
-        strncat(temp, &grid[x][cCol], 1);
-        printf("[DEBUG]: current char: %d – %c \n", x, grid[x][cCol]);
+  for (int c = 0; c < passes; c++) {
+    printf("[DEBUG] pass %d\n", c + 1);
+    // Fill the grid with the message
+    int rowIndex, colIndex;
+
+    for (rowIndex = 0; rowIndex < rows; rowIndex++) {
+      for (colIndex = 0; colIndex < columns; colIndex++) {
+        int messageIndex = rowIndex * columns + colIndex;
+          grid[rowIndex][colIndex] = temp[messageIndex];
+   //     }
       }
     }
+
+    for (int i = 0; i <= columns; i += len_key) {
+      for (int j = 0; j < len_key; j++) {
+
+        printf("%c | ", key[j]);
+      }
+    }
+
+    printf("\n");
+    for (int i = 0; i < rows; ++i) {
+      for (int j = 0; j < columns; ++j) {
+        if (grid[i][j] == '\t') {
+          printf("● | ");
+        } else {
+          printf("%c | ", grid[i][j]);
+        }
+      }
+      printf("\n");
+    }
+
+    // clear temp buffer
+    memset(temp, 0, sizeof(temp));
+    printf("[DEBUG] Successfuly cleared temp!\n");
+
+    for (int i = 0; i < columns; i += len_key) {
+      int col = i;
+      for (int j = 0; j < len_key; j++) {
+        int keyOff = keyTable[j];
+        int cCol = col + keyOff;
+        if (cCol >= 0 && cCol < columns) {
+          for (int x = 0; x < rows; x++) {
+            strncat(temp, &grid[x][cCol], 1);
+            printf("[DEBUG]: current char: %d – %c \n", x, grid[x][cCol]);
+          }
+        } else {
+          printf("[WARNING]: Out of bounds access at cCol = %d\n", cCol);
+        }
+      }
+    }
+    printf("[INFO] temp: %s \n", temp);
   }
-  printf("[INFO] temp: %s \n", temp);
+
   char *result = strdup(temp);
-  result[opt_len] = '\0';
+
   return result;
 }
 
@@ -275,7 +278,6 @@ void on_buttonEnc_clicked() {
     printf("[DEBUG] encrypt returned: %s \n", enc_out);
 
     if (enc_out != NULL) {
-      printf("[DEBUG] enc_out != NULL");
       gtk_entry_set_text(GTK_ENTRY(inputEnc), enc_out);
       gtk_label_set_text(GTK_ENTRY(labelStatus),
                          (const gchar *)"Message encrypted");
