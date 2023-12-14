@@ -98,6 +98,7 @@ char *displayArr(int *arr[]) {
 // Encrypt
 const gchar *encrypt(const char *message, const char *key, gint numColumns,
                      gint _passes) {
+
   if (message == NULL || key == NULL) {
     printf("[ERROR] Encrypt or key is null!\n");
     return NULL;
@@ -126,7 +127,9 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   // Create a 2D array for the grid
   char grid[rows][columns];
 
-  printf("[INFO] Filling grid \n");
+  printf("[DEBUG] pass \n");
+  for(int c = 0; c < passes; c++){
+  printf("[DEBUG] Filling grid \n");
 
   // Fill the grid with the message
   int rowIndex, colIndex;
@@ -139,7 +142,7 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
 
         grid[rowIndex][colIndex] = message[rowIndex * columns + colIndex];
       } else {
-        grid[rowIndex][colIndex] = '_';
+        grid[rowIndex][colIndex] = ' ';
       }
     }
   }
@@ -163,9 +166,11 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
     printf("\n");
   }
 
-  char temp[columns * rows + 1];
+  int opt_len = columns * rows + 1;
+  char temp[opt_len];
+  temp[0] = '\0';
 
-  printf("[DEBUG] attempting enc with %d passes\n",passes);
+  printf("[DEBUG] attempting enc with %d passes\n", passes);
   for (int i = 0; i < columns; i += len_key) {
     int col = i;
     for (int j = 0; j < len_key; j++) {
@@ -179,7 +184,10 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
     }
   }
   printf("[INFO] temp: %s \n", temp);
-  return temp;
+}
+  char *result = strdup(temp);
+  result[opt_len] = '\0';
+  return result;
 }
 
 // Key function
@@ -264,15 +272,19 @@ void on_buttonEnc_clicked() {
                        (const gchar *)"Plain input is empty!");
   } else {
 
-    printf("[DEBUG] Key str:%s", getKey());
     const gchar *enc_out =
         encrypt(getPlain(), getKey(), getColumns(), getPasses());
+    printf("[DEBUG] encrypt returned: %s \n", enc_out);
 
     if (enc_out != NULL) {
+      printf("[DEBUG] enc_out != NULL");
       gtk_entry_set_text(GTK_ENTRY(inputEnc), enc_out);
       gtk_label_set_text(GTK_ENTRY(labelStatus),
                          (const gchar *)"Message encrypted");
       free(enc_out);
+    } else {
+      gtk_label_set_text(GTK_ENTRY(labelStatus),
+                         (const gchar *)"Returned text is NULL!");
     }
   }
 }
