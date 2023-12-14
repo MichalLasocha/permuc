@@ -128,7 +128,6 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   char grid[rows][columns];
 
   printf("[DEBUG] pass \n");
-  for(int c = 0; c < passes; c++){
   printf("[DEBUG] Filling grid \n");
 
   // Fill the grid with the message
@@ -184,7 +183,6 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
     }
   }
   printf("[INFO] temp: %s \n", temp);
-}
   char *result = strdup(temp);
   result[opt_len] = '\0';
   return result;
