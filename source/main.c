@@ -49,7 +49,6 @@ void createKeyIndexTable(const char *_numericalString, int *indexTable) {
         char tempChar = numericalString[j];
         numericalString[j] = numericalString[j + 1];
         numericalString[j + 1] = tempChar;
-
         // Swap indices
         int tempIndex = originalIndices[j];
         originalIndices[j] = originalIndices[j + 1];
@@ -129,7 +128,7 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
   char temp[opt_len];
   strcpy(temp, message);
   for (int i = len_message; i < len_message + (rows - 1) * columns; i++) {
-    temp[i] = (i < len_message) ? temp[i] : '*';
+    temp[i] = (i < len_message) ? temp[i] : '\127';
   }
 
   for (int c = 0; c < passes; c++) {
@@ -155,7 +154,7 @@ const gchar *encrypt(const char *message, const char *key, gint numColumns,
     printf("\n");
     for (int i = 0; i < rows; ++i) {
       for (int j = 0; j < columns; ++j) {
-        if (grid[i][j] == '\t') {
+        if (grid[i][j] == '\127') {
           printf("● | ");
         } else {
           printf("%c | ", grid[i][j]);
